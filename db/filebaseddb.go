@@ -1,6 +1,7 @@
 package db
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"os"
@@ -29,14 +30,14 @@ func NewFilebaseddb(path string) *Filebaseddb {
 
 	return &db
 }
-func (db Filebaseddb) Get(index int64) []byte {
+func (db Filebaseddb) Get(index int64) (value []byte, ok bool) {
 	return db.get(wordsize * (index + 1))
 }
 func (db Filebaseddb) Set(index int64, value []byte) {
 	db.set(wordsize*(index+1), value)
 }
 func (db Filebaseddb) GetLeafLength() int64 {
-	leafLength := db.get(0)
+	leafLength, _ := db.get(0)
 	return int64(binary.BigEndian.Uint64(leafLength[wordsize-8 : wordsize]))
 }
 func (db Filebaseddb) SetLeafLength(_value int64) {
@@ -47,15 +48,18 @@ func (db Filebaseddb) SetLeafLength(_value int64) {
 	db.Fd.Sync()
 }
 
-func (db Filebaseddb) get(index int64) []byte {
-	readBuffer := make([]byte, wordsize)
-	n, err := db.Fd.ReadAt(readBuffer, int64(index))
+var emptybytes [wordsize]byte
+
+func (db Filebaseddb) get(index int64) ([]byte, bool) {
+	value := make([]byte, wordsize)
+	n, err := db.Fd.ReadAt(value, int64(index))
 
 	if err != nil || n == 0 {
 		panic(errors.New("Error reading from Filebaseddb"))
 	}
+	ok := bytes.Equal(make([]byte, wordsize), value)
 
-	return readBuffer
+	return value, ok
 }
 func (db Filebaseddb) set(index int64, value []byte) {
 	n, err := db.Fd.WriteAt(value, int64(index))
