@@ -8,7 +8,7 @@ import (
 // import "github.com/ethereum/go-ethereum/common/math"
 
 func Test(t *testing.T) {
-	db1 := NewFilebaseddb("etcLeafData.mmr")
+	db1 := NewFilebaseddb("./testdata/etcleafdata.mmr")
 	db2 := NewFilebaseddb("temp.mmr")
 
 	leafLength := db1.GetLeafLength()

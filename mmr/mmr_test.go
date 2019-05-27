@@ -5,7 +5,7 @@ import "fmt"
 import "merklemountainrange/db"
 
 func Test(t *testing.T) {
-	db1 := db.NewFilebaseddb("../db/etcLeafData.mmr")
+	db1 := db.NewFilebaseddb("../db/testdata/etcleafdata.mmr")
 	mmr := NewMmr(H, db1)
 
 	leafLength := mmr.GetLeafLength()

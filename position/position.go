@@ -145,6 +145,9 @@ func ProofPositions(leafIndexes []int64, referenceTreeLength int64) map[int64]Po
 	}
 	//add local mountain proof positions for each leaf
 	for _, leafIndex := range leafIndexes { // k*2log(n) // k is num leaves to prove
+		if leafIndex >= referenceTreeLength {
+			panic(errors.New("leafIndex must be less than leaf length"))
+		}
 		nodePosition := GetNodePosition(leafIndex)
 		finalLocalPeak := localPeakPosition(leafIndex, finalPeakPositions)
 		mountainPositions := MountainPositions(finalLocalPeak, nodePosition.Index)
@@ -161,7 +164,8 @@ func ProofPositions(leafIndexes []int64, referenceTreeLength int64) map[int64]Po
 			hasLeftChild := hasPosition(positions, LeftChild(v))
 			hasRightChild := hasPosition(positions, RightChild(v))
 			if hasLeftChild && hasRightChild {
-				impliedIndexes = append(impliedIndexes, k) // don't remove them yet because recursion will be slower
+				// don't remove them yet because recursion will be slower
+				impliedIndexes = append(impliedIndexes, k)
 			}
 		}
 	}
