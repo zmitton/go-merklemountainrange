@@ -11,17 +11,11 @@ import (
 )
 
 type Mmr struct {
-	digest     digest.Digest
-	db         db.Db
-	leafLength int64
-	// consider: do i even need semephore stuff
+	digest digest.Digest
+	db     db.Db
+	// consider: do i even need semephore stuff?
 }
 
-func H(args ...[]byte) []byte {
-	return []byte{212}
-}
-
-// leafLength of -1 for new
 func NewMmr(_digest digest.Digest, _db db.Db) Mmr {
 	this := Mmr{digest: _digest, db: _db}
 	return this
@@ -31,11 +25,7 @@ func (mmr Mmr) GetNodeLength() int64 {
 	return position.GetNodePosition(mmr.GetLeafLength()).Index
 }
 func (mmr Mmr) GetLeafLength() int64 {
-	// if mmr.leafLength == 0 {
-	// 	mmr.leafLength = mmr.db.GetLeafLength()
-	// }
-	// return mmr.leafLength
-	return mmr.db.GetLeafLength()
+	return mmr.db.GetLeafLength() // caching is handled by db
 }
 
 func (mmr Mmr) getNodeValue(p position.Position) []byte {
@@ -62,7 +52,6 @@ func (mmr Mmr) hashUp(positionPairs [][]position.Position) {
 }
 func (mmr Mmr) setLeafLength(leafLength int64) {
 	mmr.db.SetLeafLength(leafLength)
-	// mmr.leafLength = leafLength
 }
 func (mmr Mmr) verifyPath(currentPosition position.Position, currentValue []byte, leafPosition position.Position) []byte { // verifies as it walks
 	if currentPosition.Index == leafPosition.Index { // base case
@@ -83,7 +72,8 @@ func (mmr Mmr) verifyPath(currentPosition position.Position, currentValue []byte
 	}
 }
 
-func (mmr Mmr) GetProof(leafIndexes []int64, referenceTreeLength int64) Mmr { // returns a sparse MMR containing the leaves specified
+// returns a sparse MMR containing the leaves specified
+func (mmr Mmr) GetProof(leafIndexes []int64, referenceTreeLength int64) Mmr {
 	if referenceTreeLength == -1 { // variatic hack
 		referenceTreeLength = mmr.GetLeafLength()
 	}

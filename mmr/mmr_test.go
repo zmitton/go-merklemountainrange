@@ -4,6 +4,9 @@ import "testing"
 import "fmt"
 import "merklemountainrange/db"
 
+func H(args ...[]byte) []byte {
+	return []byte{212}
+}
 func Test(t *testing.T) {
 	db1 := db.NewFilebaseddb("../db/testdata/etcleafdata.mmr")
 	mmr := NewMmr(H, db1)
