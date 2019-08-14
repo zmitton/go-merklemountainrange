@@ -2,12 +2,10 @@ package mmr
 
 import (
 	"fmt"
-	"os"
 	"time"
 
-	"github.com/zmitton/go-merklemountainrange/digest"
-
 	"github.com/zmitton/go-merklemountainrange/db"
+	"github.com/zmitton/go-merklemountainrange/digest"
 
 	"testing"
 	// "crypto/sha256"
@@ -121,7 +119,7 @@ func TestInstance(t *testing.T) {
 		// tempFileBasedMmr.Append(sampleLeaf, -1)
 		// tempFileBasedMmr.Append(sampleLeaf, 1000)
 
-		os.Remove("../db/testdata/temp.mmr")
+		// os.Remove("../db/testdata/temp.mmr")
 
 	})
 
