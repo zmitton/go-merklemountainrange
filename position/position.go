@@ -92,7 +92,7 @@ func PeakPositions(leafIndex int64) []Position {
 	peakPositions := make([]Position, 0)
 	for leafIndex >= 0 {
 		currentPosition = LeftChild(currentPosition)
-		if leafIndex >= int64(math.Pow(2, currentPosition.Height-1)) {
+		if leafIndex >= int64(math.Pow(2, currentPosition.Height)-1) {
 			peakPositions = append(peakPositions, currentPosition)
 			currentPosition = Sibling(currentPosition)
 			leafIndex -= int64(math.Pow(2, currentPosition.Height)) // leafIndex becomes a kindof accumulator
@@ -102,10 +102,12 @@ func PeakPositions(leafIndex int64) []Position {
 }
 
 func LocalPeakPosition(leafIndex int64, leafLength int64) Position {
+	lastLeafIndex := leafIndex
 	if leafLength > leafIndex {
-		leafIndex = leafLength - 1
+		lastLeafIndex = leafLength - 1
 	}
-	return localPeakPosition(leafIndex, PeakPositions(leafIndex))
+
+	return localPeakPosition(leafIndex, PeakPositions(lastLeafIndex))
 }
 func localPeakPosition(leafIndex int64, peakPositions []Position) Position {
 	currentRange := int64(0)
@@ -122,12 +124,12 @@ func localPeakPosition(leafIndex int64, peakPositions []Position) Position {
 	return localPeak
 }
 
-func MountainPositions(currentPosition Position, targetIndex int64) [][]Position { // positions to hash after appending
+func MountainPositions(currentPosition Position, targetPositionIndex int64) [][]Position { // positions to hash after appending
 	mountainPositions := make([][]Position, 0)
 	for currentPosition.Height > 0 {
 		children := []Position{LeftChild(currentPosition), RightChild(currentPosition)}
 		mountainPositions = append(mountainPositions, children)
-		if targetIndex > currentPosition.Index-int64(math.Pow(2, currentPosition.Height)-currentPosition.Height+1) {
+		if targetPositionIndex > currentPosition.Index-int64(math.Pow(2, currentPosition.Height))-int64(currentPosition.Height)+1 {
 			currentPosition = children[1]
 		} else {
 			currentPosition = children[0]

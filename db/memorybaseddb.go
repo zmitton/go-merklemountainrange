@@ -1,5 +1,9 @@
 package db
 
+// import "fmt"
+
+// import "fmt"
+
 type Memorybaseddb struct {
 	nodes      map[int64][]byte
 	leafLength int64
@@ -9,16 +13,18 @@ func NewMemorybaseddb(nodes map[int64][]byte, leafLength int64) *Memorybaseddb {
 	db := Memorybaseddb{nodes: nodes, leafLength: leafLength}
 	return &db
 }
-func (db Memorybaseddb) Get(index int64) ([]byte, bool) {
+func (db *Memorybaseddb) Get(index int64) ([]byte, bool) {
 	value, ok := db.nodes[index]
 	return value, ok
 }
-func (db Memorybaseddb) Set(index int64, value []byte) {
+func (db *Memorybaseddb) Set(value []byte, index int64) {
+	//require correct wordsize
 	db.nodes[index] = value
 }
-func (db Memorybaseddb) GetLeafLength() int64 {
+func (db *Memorybaseddb) GetLeafLength() int64 {
 	return db.leafLength
 }
-func (db Memorybaseddb) SetLeafLength(_value int64) {
-	db.leafLength = _value
+func (db *Memorybaseddb) SetLeafLength(value int64) {
+	db.leafLength = value
+	// fmt.Print("HEREREEREq", value, db.leafLength)
 }
