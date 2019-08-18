@@ -113,7 +113,10 @@ func (db *Filebaseddb) SetLeafLength(leafLength int64) {
 	}
 
 	db.cachedLeafLength = leafLength
-	db.fd.Sync() // save/flush only after length data is updated
+
+	// save/flush only after length data is updated
+	//this makes appending 200x slower
+	db.fd.Sync()
 }
 
 func (db *Filebaseddb) GetWordSize() int64 {

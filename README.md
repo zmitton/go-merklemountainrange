@@ -27,6 +27,7 @@ fileBased Append               2.5ms
 make a reverse getNodePosition function (getLeafIndex?), and in the test, do a loop to
 100,000 testing each result against its inverse function
 targetIndex -> targetNodeIndex (in mountainpositions function)
+ - remember to move metadata in `.mmr` in js implimentation (this is magor version bump)
 */
 
 
