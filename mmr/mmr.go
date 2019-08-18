@@ -17,7 +17,6 @@ type Mmr struct {
 	// consider: do i even need semephore stuff?
 }
 
-
 func NewMmr(_digest digest.Digest, _db db.Db) Mmr {
 	this := Mmr{digest: _digest, db: _db}
 	return this
@@ -115,18 +114,15 @@ func (mmr *Mmr) GetProof(leafIndexes []int64, referenceTreeLength int64) Mmr {
 	return NewMmr(mmr.digest, db)
 }
 
-func (mmr *Mmr) Get(leafIndex int64) []byte {
+func (mmr *Mmr) Get(leafIndex int64) ([]byte, bool) {
 	leafLength := mmr.GetLeafLength()
 	if leafIndex >= leafLength {
-		panic(errors.New("Leaf not in tree"))
+		return []byte{}, false
+		// panic(errors.New("Leaf not in tree"))
 	}
-	leaf, _ := mmr.db.Get(position.GetNodePosition(leafIndex).Index)
-	return leaf
-	// if ok {
-	// 	return nil, leaf
-	// } else {
-	// 	return nil, []byte{}
-	// }
+	// leaf, _ := mmr.db.Get(position.GetNodePosition(leafIndex).Index)
+	// return leaf
+	return mmr.db.Get(position.GetNodePosition(leafIndex).Index)
 }
 
 func (mmr *Mmr) GetVerified(leafIndex int64) []byte {
