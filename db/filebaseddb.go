@@ -145,3 +145,8 @@ func (db *Filebaseddb) SetWordSize(wordSize int64) {
 
 	db.cachedWordSize = wordSize // cache wordSize property
 }
+
+// func (db *Filebaseddb) GetNodes() map[int64][]byte {
+// 	panic(errors.New("`GetNodes` is not yet supported for a filebased db"))
+// 	return map[int64][]byte{}
+// }

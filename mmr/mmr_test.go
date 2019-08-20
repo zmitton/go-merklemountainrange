@@ -18,13 +18,13 @@ func TestInstance(t *testing.T) {
 	os.Remove("../db/testdata/temp.mmr")
 
 	fileBasedDb1 := db.OpenFilebaseddb("../db/testdata/etcleafdata.mmr")
-	fileBasedMmr1 := NewMmr(digest.Keccak256FlyHash, fileBasedDb1)
+	fileBasedMmr1 := New(digest.Keccak256FlyHash, fileBasedDb1)
 
 	memoryBasedDb1 := db.NewMemorybaseddb(map[int64][]byte{}, 0)
-	memoryBasedMmr1 := NewMmr(digest.Keccak256FlyHash, memoryBasedDb1)
+	memoryBasedMmr1 := New(digest.Keccak256FlyHash, memoryBasedDb1)
 
 	tempFileBasedDb := db.CreateFilebaseddb("../db/testdata/temp.mmr", 64)
-	tempFileBasedMmr := NewMmr(digest.Keccak256FlyHash, tempFileBasedDb)
+	tempFileBasedMmr := New(digest.Keccak256FlyHash, tempFileBasedDb)
 
 	leafLength := fileBasedDb1.GetLeafLength()
 	etcLeafData := make([][]byte, 0)
@@ -201,6 +201,31 @@ func TestInstance(t *testing.T) {
 		}
 	})
 
+	t.Run("#Delete from a fileBasedMmr", func(t *testing.T) {
+		leafLength := tempFileBasedDb.GetLeafLength()
+		_, has34 := tempFileBasedMmr.Get(34)
+		if leafLength != 1000 || !has34 {
+			t.Errorf("ERRRRR")
+		}
+		tempFileBasedMmr.Delete(34)
+		leafLength = tempFileBasedDb.GetLeafLength()
+
+		_, has32 := tempFileBasedMmr.Get(32)
+		_, has33 := tempFileBasedMmr.Get(33)
+
+		_, has34 = tempFileBasedMmr.Get(34)
+		_, has35 := tempFileBasedMmr.Get(35)
+		if !has32 || !has33 || leafLength != 34 || has34 || has35 {
+			t.Errorf("deleting '34' should remove everything after leaf 33")
+		}
+		tempFileBasedMmr.Append(sampleLeaf1, 34) // shouldnt throw an error
+		leaf34, has34 := tempFileBasedMmr.Get(34)
+
+		if !has34 || !bytes.Equal(leaf34, sampleLeaf1) {
+			t.Errorf("leaf34 should have gotten rewritten as sampleLeaf1")
+		}
+	})
+
 	t.Run("#Delete everything after leaf index 33", func(t *testing.T) {
 		leafLength := memoryBasedDb1.GetLeafLength()
 		_, has34 := memoryBasedMmr1.Get(34)
@@ -218,13 +243,29 @@ func TestInstance(t *testing.T) {
 		if !has32 || !has33 || leafLength != 34 || has34 || has35 {
 			t.Errorf("deleting '34' should remove everything after leaf 33")
 		}
-		memoryBasedMmr1.Append(sampleLeaf1, 34) // shouldnt throw an error
-		leaf34, has34 := memoryBasedMmr1.Get(34)
-
-		if !has34 || !bytes.Equal(leaf34, sampleLeaf1) {
-			t.Errorf("leaf34 should have gotten rewritten as sampleLeaf1")
-		}
 	})
+
+	t.Run("#AppendMany at once", func(t *testing.T) {
+		
+		proofMmr := memoryBasedMmr1.GetProof([]int64{18})
+		// v := reflect.ValueOf(&proofMmr)
+		// v := reflect.ValueOf(*db)
+		// y := v.FieldByName("nodes")
+		// fmt.Print(v)
+		// fmt.Print(y)
+		fmt.Print("AAAA  ", proofMmr)
+		// fmt.Print("BBBB    ", proofMmr.GetDb())
+	})
+	// t.Run("#GetRoot of leaf 3", func(t *testing.T) {
+	// 	proofMmr := memoryBasedMmr1.GetProof([]int64{18})
+	// 	// v := reflect.ValueOf(&proofMmr)
+	// 	// v := reflect.ValueOf(*db)
+	// 	// y := v.FieldByName("nodes")
+	// 	// fmt.Print(v)
+	// 	// fmt.Print(y)
+	// 	fmt.Print("AAAA  ", proofMmr)
+	// 	// fmt.Print("BBBB    ", proofMmr.GetDb())
+	// })
 
 	os.Remove("../db/testdata/temp.mmr")
 }

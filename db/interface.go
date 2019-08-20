@@ -7,6 +7,7 @@ type Db interface {
 	Set([]byte, int64)
 	GetLeafLength() int64
 	SetLeafLength(int64)
+	// GetNodes() map[int64][]byte
 }
 
 // type Db64 interface {

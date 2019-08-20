@@ -1,9 +1,5 @@
 package db
 
-// import "fmt"
-
-// import "fmt"
-
 type Memorybaseddb struct {
 	nodes      map[int64][]byte
 	leafLength int64
@@ -28,3 +24,7 @@ func (db *Memorybaseddb) SetLeafLength(value int64) {
 	db.leafLength = value
 	// fmt.Print("HEREREEREq", value, db.leafLength)
 }
+// func (db *Memorybaseddb) GetNodes() map[int64][]byte {
+// 	nodes := map[int64][]byte{}
+// 	return nodes
+// }

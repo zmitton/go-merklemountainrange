@@ -12,6 +12,7 @@ The format for `.mmr` files is being changed to hold the  `wordsize` information
 
 Every operation benchmarked thus far has been almost _exactly_ 20x faster than its JS version.
 
+```
 memoryBased Get (unverified):        800ns
 memoryBased GetVerified:           3.8µs
 memoryBased Append:                6.0µs
@@ -19,15 +20,15 @@ memoryBased Append:                6.0µs
 fileBased Get (unverified):        2.0µs
 fileBased GetVerified:            38.9µs
 fileBased Append               2.5ms
-
-
+```
 
 
 /*
 make a reverse getNodePosition function (getLeafIndex?), and in the test, do a loop to
-100,000 testing each result against its inverse function
-targetIndex -> targetNodeIndex (in mountainpositions function)
- - remember to move metadata in `.mmr` in js implimentation (this is magor version bump)
+100,000 testing each result against its inverse function (actually is this possible? consider the fact that some nodes dont have a cooresponding leaf).
+name change: targetIndex -> targetNodeIndex (in mountainpositions function)
+ - remember to move metadata in `.mmr` in js implimentation (this is major version bump)
+
 */
 
 

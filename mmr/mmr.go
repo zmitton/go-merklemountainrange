@@ -2,9 +2,9 @@ package mmr
 
 import (
 	"errors"
+
 	// "fmt"
 	"math"
-	"sync"
 
 	"github.com/zmitton/go-merklemountainrange/db"
 	"github.com/zmitton/go-merklemountainrange/digest"
@@ -17,9 +17,8 @@ type Mmr struct {
 	// consider: do i even need semephore stuff?
 }
 
-func NewMmr(_digest digest.Digest, _db db.Db) Mmr {
-	this := Mmr{digest: _digest, db: _db}
-	return this
+func New(_digest digest.Digest, _db db.Db) *Mmr {
+	return &Mmr{digest: _digest, db: _db}
 }
 
 func (mmr *Mmr) GetNodeLength() int64 {
@@ -94,24 +93,17 @@ func (mmr *Mmr) verifyPath(currentPosition position.Position, currentValue []byt
 }
 
 // returns a sparse MMR containing the leaves specified
-func (mmr *Mmr) GetProof(leafIndexes []int64, referenceTreeLength int64) Mmr {
-	if referenceTreeLength == -1 { // variatic hack
-		referenceTreeLength = mmr.GetLeafLength()
+func (mmr *Mmr) GetProof(leafIndexes []int64, referenceTreeLength ...int64) *Mmr {
+	if len(referenceTreeLength) == 0 { // variatic hack
+		referenceTreeLength = append(referenceTreeLength, mmr.GetLeafLength())
 	}
-
-	positions := position.ProofPositions(leafIndexes, referenceTreeLength)
-	db := db.NewMemorybaseddb(make(map[int64][]byte), referenceTreeLength)
-	var wg sync.WaitGroup
-	wg.Add(len(positions))
+	positions := position.ProofPositions(leafIndexes, referenceTreeLength[0])
+	db := db.NewMemorybaseddb(make(map[int64][]byte), referenceTreeLength[0])
 	for _, position := range positions {
-		go func() {
-			db.Set(mmr.getNodeValue(position), position.Index)
-			wg.Done()
-		}()
+		db.Set(mmr.getNodeValue(position), position.Index)
 	}
-	wg.Wait()
-
-	return NewMmr(mmr.digest, db)
+	// fmt.Print(db) //for testing only
+	return New(mmr.digest, db)
 }
 
 func (mmr *Mmr) Get(leafIndex int64) ([]byte, bool) {
@@ -143,9 +135,9 @@ func (mmr *Mmr) GetVerified(leafIndex int64) []byte {
 	// fmt.Print("\nleafPOSITION", leafPosition)
 	return mmr.verifyPath(localPeakPosition, localPeakValue, leafPosition)
 }
-func (mmr *Mmr) Append(value []byte, leafIndex int64) {
+func (mmr *Mmr) Append(value []byte, leafIndex ...int64) {
 	leafLength := mmr.GetLeafLength()
-	if leafIndex == -1 || leafIndex == leafLength {
+	if len(leafIndex) == 0 || leafIndex[0] == leafLength {
 		nodePosition := position.GetNodePosition(leafLength)
 		mountainPositions := position.MountainPositions(position.LocalPeakPosition(leafLength, leafLength), nodePosition.Index)
 		if len(value) != 64 {
@@ -159,20 +151,20 @@ func (mmr *Mmr) Append(value []byte, leafIndex int64) {
 		panic(errors.New("Can only append to end of MMR"))
 	}
 }
-func (mmr *Mmr) AppendMany(values [][]byte, startLeafIndex int64) {
-	if startLeafIndex == -1 {
-		startLeafIndex = mmr.GetLeafLength()
+func (mmr *Mmr) AppendMany(values [][]byte, startLeafIndex ...int64) {
+	if len(startLeafIndex) == 0 {
+		startLeafIndex = append(startLeafIndex, mmr.GetLeafLength())
 	}
 	for i, value := range values {
-		mmr.Append(value, startLeafIndex+int64(i))
+		mmr.Append(value, startLeafIndex[0]+int64(i))
 	}
 }
-func (mmr *Mmr) GetRoot(leafIndex int64) []byte {
+func (mmr *Mmr) GetRoot(leafIndex ...int64) []byte {
 	var peakValues []byte
-	if leafIndex == -1 {
-		leafIndex = mmr.GetLeafLength() - 1
+	if len(leafIndex) == 0 {
+		leafIndex = append(leafIndex, mmr.GetLeafLength()-1)
 	}
-	peakPositions := position.PeakPositions(leafIndex)
+	peakPositions := position.PeakPositions(leafIndex[0])
 	for _, peakPosition := range peakPositions {
 		peakValues = append(peakValues, mmr.getNodeValue(peakPosition)...)
 	}
@@ -188,3 +180,7 @@ func (mmr *Mmr) Delete(leafIndex int64) {
 		mmr.setLeafLength(leafIndex)
 	}
 }
+
+// func (mmr *Mmr) GetDb() db.Db {
+// 	return mmr.db
+// }
