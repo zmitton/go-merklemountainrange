@@ -22,13 +22,38 @@ fileBased GetVerified:            38.9µs
 fileBased Append               2.5ms
 ```
 
-
+<!-- 
+notes
 /*
 make a reverse getNodePosition function (getLeafIndex?), and in the test, do a loop to
 100,000 testing each result against its inverse function (actually is this possible? consider the fact that some nodes dont have a cooresponding leaf).
 name change: targetIndex -> targetNodeIndex (in mountainpositions function)
  - remember to move metadata in `.mmr` in js implimentation (this is major version bump)
-
+ - add `serialize()` method to db api and add `fromSerialized()` to membased db
 */
 
+nodes (map[int64][]byte):
+{ 
+  30 : 0x1234567890,
+  33 : 0x2143658709,
+  34 : 0x1234123434
+}
 
+encodable version ([][][]byte):
+[
+  [12,34],
+  [
+    [1e],
+    [12,34,56,78,90]
+  ],
+  [
+    [21],
+    [21,43,65,87,09]
+  ],
+  [
+    [22],
+    [12,34,12,34,34]
+  ]
+]
+
+ -->

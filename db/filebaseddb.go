@@ -13,10 +13,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-
-	// "fmt"
 	"os"
-	// "time"
 )
 
 const WORD_SIZE_OFFSET = 0
@@ -33,8 +30,7 @@ type Filebaseddb struct {
 func OpenFilebaseddb(path string) *Filebaseddb {
 	file, err := os.OpenFile(path, os.O_RDWR, 0644)
 	if err != nil {
-		panic(err)
-		// panic(errors.New("Error opening filedb"))
+		panic(errors.New("Error opening filedb"))
 	}
 	db := Filebaseddb{fd: file}
 
@@ -66,11 +62,9 @@ func (db *Filebaseddb) Get(index int64) ([]byte, bool) {
 	wordSize := db.GetWordSize()
 	value := make([]byte, wordSize)
 	n, err := db.fd.ReadAt(value, wordSize*int64(index+1))
-	// fmt.Print("GGGG ", wordSize*int64(index+1))
 
-	ok := true // !bytes.Equal(make([]byte, wordsize), value)
+	ok := true
 	if err != nil || n == 0 {
-		// panic(err)
 		ok = false
 	}
 
@@ -115,7 +109,7 @@ func (db *Filebaseddb) SetLeafLength(leafLength int64) {
 	db.cachedLeafLength = leafLength
 
 	// save/flush only after length data is updated
-	//this makes appending 200x slower
+	// this makes appending 200x slower. Is there a way around it?
 	db.fd.Sync()
 }
 
@@ -139,14 +133,37 @@ func (db *Filebaseddb) SetWordSize(wordSize int64) {
 	n, err := db.fd.WriteAt(wordSizeBuffer, int64(WORD_SIZE_OFFSET))
 
 	if err != nil || n == 0 || wordSize < 16 {
-		// panic(err)
 		panic(errors.New("Error initiallizing wordSize to Filebaseddb"))
 	}
 
 	db.cachedWordSize = wordSize // cache wordSize property
 }
 
-// func (db *Filebaseddb) GetNodes() map[int64][]byte {
-// 	panic(errors.New("`GetNodes` is not yet supported for a filebased db"))
-// 	return map[int64][]byte{}
-// }
+// This function is not recomended to run on a file based db because
+// it iterates every single node, and file based dbs have
+// the entire dataset as opposed to a proof-based db (sparse dataset)
+func (db *Filebaseddb) Serialize() []byte {
+	nodes := db.getNodes()
+	memDb := NewMemorybaseddb(nodes, db.GetLeafLength())
+	return memDb.Serialize()
+}
+
+func (db *Filebaseddb) getNodes() map[int64][]byte {
+	db.fd.Sync()
+	wordSize := db.GetWordSize()
+	stat, err := db.fd.Stat()
+	if err != nil {
+		panic(errors.New("Error reading filebased db stat"))
+	}
+	fileSize := stat.Size()
+	nodeLength := (fileSize - wordSize) / wordSize
+	nodes := map[int64][]byte{}
+	for i := int64(0); i < nodeLength; i++ {
+		nodeValue, ok := db.Get(i)
+		if !ok {
+			panic(errors.New("Error reading filebased db node index " + string(i)))
+		}
+		nodes[nodeLength] = nodeValue
+	}
+	return nodes
+}

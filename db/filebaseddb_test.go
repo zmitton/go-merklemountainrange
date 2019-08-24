@@ -3,11 +3,8 @@ package db
 import (
 	"fmt"
 	"testing"
-	// "github.com/zmitton/go-merklemountainrange/mmr"
-	// "github.com/zmitton/go-merklemountainrange/mmr"
 )
 
-// import "github.com/ethereum/go-ethereum/common/math"
 
 func Test(t *testing.T) {
 	db1 := OpenFilebaseddb("../db/testdata/etcleafdata.mmr")
@@ -53,18 +50,4 @@ func Test(t *testing.T) {
 	if db2node2[0:1][0] != []byte{135}[0] {
 		t.Errorf("index 2 should start with '87'")
 	}
-
-	// t.Run("#GetRoot of leaf 3", func(t *testing.T) {
-	// 	db2 := NewMemorybaseddb(map[int64][]byte{}, 0)
-	// 	memMmr := mmr.New(digest.Keccak256FlyHash, db2)
-	// 	proofMmr := memMmr.GetProof([]int64{18})
-	// 	// v := reflect.ValueOf(&proofMmr)
-	// 	// v := reflect.ValueOf(*db)
-	// 	// y := v.FieldByName("nodes")
-	// 	// fmt.Print(v)
-	// 	// fmt.Print(y)
-	// 	fmt.Print("AAAA  ", proofMmr)
-	// 	// fmt.Print("BBBB    ", proofMmr.GetDb())
-	// })
-
 }

@@ -10,8 +10,6 @@ import (
 	"github.com/zmitton/go-merklemountainrange/digest"
 
 	"testing"
-	// "crypto/sha256"
-	// "github.com/zmitton/go-flyclient"
 )
 
 func TestInstance(t *testing.T) {
@@ -116,19 +114,19 @@ func TestInstance(t *testing.T) {
 			t.Errorf("got incorrect hash parent for H(leaf0,leaf1)")
 		}
 	})
-	// t.Run("#full replication of etcTestData", func(t *testing.T) {
-	// 	nodeLength := fileBasedMmr1.GetNodeLength()
+	t.Run("#full replication of etcTestData", func(t *testing.T) {
+		nodeLength := fileBasedMmr1.GetNodeLength()
 
-	// 	for i := int64(0); i < nodeLength; i++ {
-	// 		fixtureNode, _ := fileBasedDb1.Get(i)
-	// 		tempNode, _ := tempFileBasedDb.Get(i)
-	// 		if !bytes.Equal(fixtureNode, tempNode) {
-	// 			fmt.Print("Expected\n", fmt.Sprintf("%x", fixtureNode))
-	// 			fmt.Print("\nGot\n", fmt.Sprintf("%x", tempNode))
-	// 			t.Errorf("got incorrect db node")
-	// 		}
-	// 	}
-	// })
+		for i := int64(0); i < nodeLength; i++ {
+			fixtureNode, _ := fileBasedDb1.Get(i)
+			tempNode, _ := tempFileBasedDb.Get(i)
+			if !bytes.Equal(fixtureNode, tempNode) {
+				fmt.Print("Expected\n", fmt.Sprintf("%x", fixtureNode))
+				fmt.Print("\nGot\n", fmt.Sprintf("%x", tempNode))
+				t.Errorf("got incorrect db node")
+			}
+		}
+	})
 
 	t.Run("#GetRoot of leaf 999", func(t *testing.T) {
 		root := memoryBasedMmr1.GetRoot(999)
@@ -245,27 +243,23 @@ func TestInstance(t *testing.T) {
 		}
 	})
 
-	t.Run("#AppendMany at once", func(t *testing.T) {
-		
+	t.Run("#GetProof", func(t *testing.T) {
 		proofMmr := memoryBasedMmr1.GetProof([]int64{18})
-		// v := reflect.ValueOf(&proofMmr)
-		// v := reflect.ValueOf(*db)
-		// y := v.FieldByName("nodes")
-		// fmt.Print(v)
-		// fmt.Print(y)
-		fmt.Print("AAAA  ", proofMmr)
-		// fmt.Print("BBBB    ", proofMmr.GetDb())
+		serialized := proofMmr.Serialize()
+		fmt.Print(fmt.Sprintf("\n\nProofhex:\n0x%x\n\n", serialized))
+		computedPrfMmr := FromSerialized(digest.Keccak256FlyHash, serialized) // testing it doesnt throw
+		_, ok18 := computedPrfMmr.Get(18)
+		_, ok19 := computedPrfMmr.Get(19)
+		_, ok17 := computedPrfMmr.Get(17)
+		_, ok20 := computedPrfMmr.Get(20)
+		computedPrfMmr.GetVerified(18) // expect not to throw
+		computedPrfMmr.GetVerified(19) // expect not to throw
+		// computedPrfMmr.GetVerified(17) // expect to throw
+		// computedPrfMmr.GetVerified(20) // expect to throw
+		if !ok18 || !ok19 || ok17 || ok20 {
+			t.Errorf("Proof contained wrong subset of valued")
+		}
 	})
-	// t.Run("#GetRoot of leaf 3", func(t *testing.T) {
-	// 	proofMmr := memoryBasedMmr1.GetProof([]int64{18})
-	// 	// v := reflect.ValueOf(&proofMmr)
-	// 	// v := reflect.ValueOf(*db)
-	// 	// y := v.FieldByName("nodes")
-	// 	// fmt.Print(v)
-	// 	// fmt.Print(y)
-	// 	fmt.Print("AAAA  ", proofMmr)
-	// 	// fmt.Print("BBBB    ", proofMmr.GetDb())
-	// })
 
 	os.Remove("../db/testdata/temp.mmr")
 }
