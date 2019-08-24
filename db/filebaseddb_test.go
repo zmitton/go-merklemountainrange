@@ -5,11 +5,9 @@ import (
 	"testing"
 )
 
-// import "github.com/ethereum/go-ethereum/common/math"
-
 func Test(t *testing.T) {
-	db1 := NewFilebaseddb("./testdata/etcleafdata.mmr")
-	db2 := NewFilebaseddb("temp.mmr")
+	db1 := OpenFilebaseddb("../db/testdata/etcleafdata.mmr")
+	db2 := CreateFilebaseddb("../db/testdata/temp.mmr", 64)
 
 	leafLength := db1.GetLeafLength()
 	if leafLength != 1000 {
@@ -34,22 +32,21 @@ func Test(t *testing.T) {
 		t.Errorf("index 2 should start with '87'")
 	}
 
-	db2.Set(0, db1node0)
+	db2.Set(db1node0, 0)
 	db2node0, _ := db2.Get(0)
 	if db2node0[0:1][0] != []byte{212}[0] {
 		t.Errorf("index 0 should start with 'd4'")
 	}
 
-	db2.Set(1, db1node1)
+	db2.Set(db1node1, 1)
 	db2node1, _ := db2.Get(1)
 	if db2node1[0:1][0] != []byte{136}[0] {
 		t.Errorf("index 1 should start with '88'")
 	}
 
-	db2.Set(2, db1node2)
+	db2.Set(db1node2, 2)
 	db2node2, _ := db2.Get(2)
 	if db2node2[0:1][0] != []byte{135}[0] {
 		t.Errorf("index 2 should start with '87'")
 	}
-
 }
