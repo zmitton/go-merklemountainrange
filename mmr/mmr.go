@@ -92,7 +92,9 @@ func (mmr *Mmr) Serialize() []byte {
 	return mmr.db.Serialize()
 }
 
-func (mmr *Mmr) Get(leafIndex int64) ([]byte, bool) {
+// Use `Get()` in most cases (to be safe). Only use this for extra speed when 
+// interacting with a full mmr and not dealing with proofs.
+func (mmr *Mmr) GetUnverified(leafIndex int64) ([]byte, bool) {
 	leafLength := mmr.GetLeafLength()
 	if leafIndex >= leafLength {
 		return []byte{}, false
@@ -100,7 +102,7 @@ func (mmr *Mmr) Get(leafIndex int64) ([]byte, bool) {
 	return mmr.db.Get(position.GetNodePosition(leafIndex).Index)
 }
 
-func (mmr *Mmr) GetVerified(leafIndex int64) []byte {
+func (mmr *Mmr) Get(leafIndex int64) []byte {
 	leafLength := mmr.GetLeafLength()
 	if leafIndex >= leafLength {
 		panic(errors.New("Leaf not in tree"))
