@@ -27,18 +27,18 @@ func TestInstance(t *testing.T) {
 	leafLength := fileBasedDb1.GetLeafLength()
 	etcLeafData := make([][]byte, 0)
 
-	sampleLeaf0, _ := fileBasedMmr1.Get(0)
-	sampleLeaf1, _ := fileBasedMmr1.Get(1)
+	sampleLeaf0, _ := fileBasedMmr1.GetUnverified(0)
+	sampleLeaf1, _ := fileBasedMmr1.GetUnverified(1)
 
 	for i := int64(0); i < leafLength; i++ {
-		leaf, _ := fileBasedMmr1.Get(i)
+		leaf, _ := fileBasedMmr1.GetUnverified(i)
 		etcLeafData = append(etcLeafData, leaf)
 	}
 
 	t.Run("#Append to in-memory mmr", func(t *testing.T) {
 		leafLength := fileBasedDb1.GetLeafLength()
 		for i := int64(0); i < leafLength; i++ {
-			leaf, _ := fileBasedMmr1.Get(i)
+			leaf, _ := fileBasedMmr1.GetUnverified(i)
 			memoryBasedMmr1.Append(leaf, i)
 		}
 	})
@@ -70,34 +70,34 @@ func TestInstance(t *testing.T) {
 		// in-memory based
 		preTime := time.Now()
 		for i := int64(0); i < NUM_LOOPS; i++ {
+			memoryBasedMmr1.GetUnverified(i)
+		}
+		fmt.Print("\nin-memory #GetUnverified (w ~1000 leaves):\t", time.Since(preTime)/NUM_LOOPS)
+
+		preTime = time.Now()
+		for i := int64(0); i < NUM_LOOPS; i++ {
 			memoryBasedMmr1.Get(i)
 		}
-		fmt.Print("\nin-memory #Get (w ~1000 leaves):        \t", time.Since(preTime)/NUM_LOOPS)
+		fmt.Print("\nin-memory #Get (w ~1000 leaves):\t\t", time.Since(preTime)/NUM_LOOPS)
 
 		preTime = time.Now()
 		for i := int64(0); i < NUM_LOOPS; i++ {
-			memoryBasedMmr1.GetVerified(i)
-		}
-		fmt.Print("\nin-memory #GetVerified (w ~1000 leaves):\t", time.Since(preTime)/NUM_LOOPS)
-
-		preTime = time.Now()
-		for i := int64(0); i < NUM_LOOPS; i++ {
-			// memoryBasedMmr1.Append(sampleLeaf0, i+1000)
+			memoryBasedMmr1.Append(sampleLeaf0, i+1000)
 		}
 		fmt.Print("\nin-memory #Append (w ~1000 leaves):      \t", time.Since(preTime)/NUM_LOOPS)
 
 		//file based
 		preTime = time.Now()
 		for i := int64(0); i < NUM_LOOPS; i++ {
-			fileBasedMmr1.Get(i)
+			fileBasedMmr1.GetUnverified(i)
 		}
-		fmt.Print("\n\nfile-based #Get (w ~1000 leaves):       \t", time.Since(preTime)/NUM_LOOPS)
+		fmt.Print("\n\nfile-based #GetUnverified (w ~1000 leaves):\t", time.Since(preTime)/NUM_LOOPS)
 
 		preTime = time.Now()
 		for i := int64(0); i < NUM_LOOPS; i++ {
-			fileBasedMmr1.GetVerified(i)
+			fileBasedMmr1.Get(i)
 		}
-		fmt.Print("\nfile based #GetVerified (w ~1000 leaves):\t", time.Since(preTime)/NUM_LOOPS)
+		fmt.Print("\nfile based #Get (w ~1000 leaves):\t\t", time.Since(preTime)/NUM_LOOPS)
 		preTime = time.Now()
 		for i := int64(0); i < NUM_LOOPS; i++ {
 			tempFileBasedMmr.Append(etcLeafData[i], i)
@@ -201,23 +201,23 @@ func TestInstance(t *testing.T) {
 
 	t.Run("#Delete from a fileBasedMmr", func(t *testing.T) {
 		leafLength := tempFileBasedDb.GetLeafLength()
-		_, has34 := tempFileBasedMmr.Get(34)
+		_, has34 := tempFileBasedMmr.GetUnverified(34)
 		if leafLength != 1000 || !has34 {
 			t.Errorf("ERRRRR")
 		}
 		tempFileBasedMmr.Delete(34)
 		leafLength = tempFileBasedDb.GetLeafLength()
 
-		_, has32 := tempFileBasedMmr.Get(32)
-		_, has33 := tempFileBasedMmr.Get(33)
+		_, has32 := tempFileBasedMmr.GetUnverified(32)
+		_, has33 := tempFileBasedMmr.GetUnverified(33)
 
-		_, has34 = tempFileBasedMmr.Get(34)
-		_, has35 := tempFileBasedMmr.Get(35)
+		_, has34 = tempFileBasedMmr.GetUnverified(34)
+		_, has35 := tempFileBasedMmr.GetUnverified(35)
 		if !has32 || !has33 || leafLength != 34 || has34 || has35 {
 			t.Errorf("deleting '34' should remove everything after leaf 33")
 		}
 		tempFileBasedMmr.Append(sampleLeaf1, 34) // shouldnt throw an error
-		leaf34, has34 := tempFileBasedMmr.Get(34)
+		leaf34, has34 := tempFileBasedMmr.GetUnverified(34)
 
 		if !has34 || !bytes.Equal(leaf34, sampleLeaf1) {
 			t.Errorf("leaf34 should have gotten rewritten as sampleLeaf1")
@@ -226,18 +226,20 @@ func TestInstance(t *testing.T) {
 
 	t.Run("#Delete everything after leaf index 33", func(t *testing.T) {
 		leafLength := memoryBasedDb1.GetLeafLength()
-		_, has34 := memoryBasedMmr1.Get(34)
-		if leafLength != 1000 || !has34 {
+		_, has34 := memoryBasedMmr1.GetUnverified(34)
+		if leafLength != 2000 || !has34 {
 			t.Errorf("ERRRRR")
 		}
 		memoryBasedMmr1.Delete(34)
 		leafLength = memoryBasedDb1.GetLeafLength()
 
-		_, has32 := memoryBasedMmr1.Get(32)
-		_, has33 := memoryBasedMmr1.Get(33)
+		_, has32 := memoryBasedMmr1.GetUnverified(32)
+		_, has33 := memoryBasedMmr1.GetUnverified(33)
+		// memoryBasedMmr1.Get(34) // should throw
+		// memoryBasedMmr1.Get(35) // should throw
 
-		_, has34 = memoryBasedMmr1.Get(34)
-		_, has35 := memoryBasedMmr1.Get(35)
+		_, has34 = memoryBasedMmr1.GetUnverified(34)
+		_, has35 := memoryBasedMmr1.GetUnverified(35)
 		if !has32 || !has33 || leafLength != 34 || has34 || has35 {
 			t.Errorf("deleting '34' should remove everything after leaf 33")
 		}
@@ -248,15 +250,15 @@ func TestInstance(t *testing.T) {
 		serialized := proofMmr.Serialize()
 		fmt.Print(fmt.Sprintf("\n\nProofhex:\n0x%x\n\n", serialized))
 		computedPrfMmr := FromSerialized(digest.Keccak256FlyHash, serialized) // testing it doesnt throw
-		_, ok18 := computedPrfMmr.Get(18)
-		_, ok19 := computedPrfMmr.Get(19)
-		_, ok17 := computedPrfMmr.Get(17)
-		_, ok20 := computedPrfMmr.Get(20)
-		computedPrfMmr.GetVerified(18) // expect not to throw
-		computedPrfMmr.GetVerified(19) // expect not to throw
-		// computedPrfMmr.GetVerified(17) // expect to throw
-		// computedPrfMmr.GetVerified(20) // expect to throw
-		if !ok18 || !ok19 || ok17 || ok20 {
+		_, has18 := computedPrfMmr.GetUnverified(18)
+		_, has19 := computedPrfMmr.GetUnverified(19)
+		_, has17 := computedPrfMmr.GetUnverified(17)
+		_, has20 := computedPrfMmr.GetUnverified(20)
+		computedPrfMmr.Get(18) // expect not to throw
+		computedPrfMmr.Get(19) // expect not to throw
+		// computedPrfMmr.Get(17) // expect to throw
+		// computedPrfMmr.Get(20) // expect to throw
+		if !has18 || !has19 || has17 || has20 {
 			t.Errorf("Proof contained wrong subset of valued")
 		}
 	})

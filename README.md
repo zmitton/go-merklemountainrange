@@ -13,12 +13,12 @@ The format for `.mmr` files is being changed to hold the  `wordsize` information
 Every operation benchmarked thus far has been almost _exactly_ 20x faster than its JS version.
 
 ```
-memoryBased Get (unverified):        800ns
-memoryBased GetVerified:           3.8µs
+memoryBased GetUnverified:           800ns
+memoryBased Get:                   3.8µs
 memoryBased Append:                6.0µs
 
-fileBased Get (unverified):        2.0µs
-fileBased GetVerified:            38.9µs
+fileBased GetUnverified:           2.0µs
+fileBased Get:                    38.9µs
 fileBased Append               2.5ms
 ```
 
@@ -30,6 +30,7 @@ make a reverse getNodePosition function (getLeafIndex?), and in the test, do a l
 name change: targetIndex -> targetNodeIndex (in mountainpositions function)
  - remember to move metadata in `.mmr` in js implimentation (this is major version bump)
  - add `serialize()` method to db api and add `fromSerialized()` to membased db
+ - add `getUnverified()` method to js api (note: has to check leaflength)
 */
 
 nodes (map[int64][]byte):
