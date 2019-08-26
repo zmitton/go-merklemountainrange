@@ -31,6 +31,8 @@ name change: targetIndex -> targetNodeIndex (in mountainpositions function)
  - remember to move metadata in `.mmr` in js implimentation (this is major version bump)
  - add `serialize()` method to db api and add `fromSerialized()` to membased db
  - add `getUnverified()` method to js api (note: has to check leaflength)
+ - add pretections for file-based in case it already exists (doesnt overwrite)
+ - add persistent leveldb support with NAMESPACE feature
 */
 
 nodes (map[int64][]byte):

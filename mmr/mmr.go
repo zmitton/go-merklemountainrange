@@ -92,7 +92,7 @@ func (mmr *Mmr) Serialize() []byte {
 	return mmr.db.Serialize()
 }
 
-// Use `Get()` in most cases (to be safe). Only use this for extra speed when 
+// Use `Get()` in most cases (to be safe). Only use this for extra speed when
 // interacting with a full mmr and not dealing with proofs.
 func (mmr *Mmr) GetUnverified(leafIndex int64) ([]byte, bool) {
 	leafLength := mmr.GetLeafLength()
