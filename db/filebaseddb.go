@@ -144,7 +144,7 @@ func (db *Filebaseddb) SetWordSize(wordSize int64) {
 // the entire dataset as opposed to a proof-based db (sparse dataset)
 func (db *Filebaseddb) Serialize() []byte {
 	nodes := db.getNodes()
-	memDb := NewMemorybaseddb(nodes, db.GetLeafLength())
+	memDb := NewMemorybaseddb(db.GetLeafLength(), nodes)
 	return memDb.Serialize()
 }
 
@@ -155,7 +155,7 @@ func (db *Filebaseddb) getNodes() map[int64][]byte {
 	if err != nil {
 		panic(errors.New("Error reading filebased db stat"))
 	}
-	fileSize := stat.Size()
+	fileSize := stat.Size() //todo: test this
 	nodeLength := (fileSize - wordSize) / wordSize
 	nodes := map[int64][]byte{}
 	for i := int64(0); i < nodeLength; i++ {

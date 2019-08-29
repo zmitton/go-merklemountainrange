@@ -13,7 +13,7 @@ type Memorybaseddb struct {
 	nodes      map[int64][]byte
 }
 
-func NewMemorybaseddb(nodes map[int64][]byte, leafLength int64) *Memorybaseddb {
+func NewMemorybaseddb(leafLength int64, nodes map[int64][]byte) *Memorybaseddb {
 	db := Memorybaseddb{nodes: nodes, leafLength: leafLength}
 	return &db
 }

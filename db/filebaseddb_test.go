@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"os"
 	"testing"
 )
 
@@ -49,4 +50,5 @@ func Test(t *testing.T) {
 	if db2node2[0:1][0] != []byte{135}[0] {
 		t.Errorf("index 2 should start with '87'")
 	}
+	os.Remove("../db/testdata/temp.mmr")
 }

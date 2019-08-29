@@ -19,8 +19,8 @@ func New(_digest digest.Digest, _db db.Db) *Mmr {
 	return &Mmr{digest: _digest, db: _db}
 }
 
-func FromSerialized(_digest digest.Digest, input []byte) *Mmr {
-	return New(_digest, db.FromSerialized(input))
+func FromSerialized(_digest digest.Digest, serializedDb []byte) *Mmr {
+	return New(_digest, db.FromSerialized(serializedDb)) /*uses a memoryBasedDb*/
 }
 
 func (mmr *Mmr) GetNodeLength() int64 {
@@ -82,7 +82,7 @@ func (mmr *Mmr) GetProof(leafIndexes []int64, referenceTreeLength ...int64) *Mmr
 	}
 	positions := position.ProofPositions(leafIndexes, referenceTreeLength[0])
 	nodes := make(map[int64][]byte)
-	db := db.NewMemorybaseddb(nodes, referenceTreeLength[0])
+	db := db.NewMemorybaseddb(referenceTreeLength[0], nodes)
 	for _, position := range positions {
 		db.Set(mmr.getNodeValue(position), position.Index)
 	}

@@ -18,7 +18,7 @@ func TestInstance(t *testing.T) {
 	fileBasedDb1 := db.OpenFilebaseddb("../db/testdata/etcleafdata.mmr")
 	fileBasedMmr1 := New(digest.Keccak256FlyHash, fileBasedDb1)
 
-	memoryBasedDb1 := db.NewMemorybaseddb(map[int64][]byte{}, 0)
+	memoryBasedDb1 := db.NewMemorybaseddb(0, map[int64][]byte{})
 	memoryBasedMmr1 := New(digest.Keccak256FlyHash, memoryBasedDb1)
 
 	tempFileBasedDb := db.CreateFilebaseddb("../db/testdata/temp.mmr", 64)

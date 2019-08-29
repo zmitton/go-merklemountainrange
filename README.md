@@ -1,14 +1,16 @@
 # MerkleMountainRange
-Golang version of [this](https://github.com/zmitton/merkle-mountain-range)
+Golang version of [this](https://github.com/zmitton/merkle-mountain-range). Please use the readme over there to understand how this all works. It's almost exactly the same API. This go implimentation is finally feature complete and well tested.
 
-The plan is to have the exact same API. Both packages use a fileBaseddb adapter that can interface with the same database format (the database is just a file).
+As of now, the only function missing here is the ability to add more db nodes to an existing proof (sparse) mmr. You can already serialize an mmr and create an mmr from serilized data, so I'm not sure when you would need to use that other feature.
 
-This golang version is still being made however (Javascript one works now).
+Both packages support a memoryBasedDb or a fileBaseddb. The fileBased format is identical (`.mmr` can be opened by either implimentation). I would like to add leveldb based db support (mostly for use with ethereum), but I havent yet because the file format I designed is about half the space/cost. The `.mmr` file is essentially treated as a random access array. Here is the format.
 
-The format for `.mmr` files is being changed to hold the  `wordsize` information.
 ```
-[[wordsize]8 [leafLength]8 ]wordsize [leaf0] wordsize [leaf1] wordsize...
+[[wordsize](8) [leafLength](8)](wordsize) [node0](wordsize) [node1](wordsize)...
 ```
+
+I might make a rust version, any help would be greatly appreciated (I dont know rust at all). This is also my first golang project so feel free to correct any small or large mistakes.
+
 
 Every operation benchmarked thus far has been almost _exactly_ 20x faster than its JS version.
 
@@ -22,6 +24,8 @@ fileBased Get:                    38.9µs
 fileBased Append               2.5ms
 ```
 
+This fileBased append takes much longer unfortunately because it calls fs.sync(). If anyone knows a better way to (essentially) _save_ the db after the `append`, please let me know.
+
 <!-- 
 notes
 /*
@@ -34,29 +38,5 @@ name change: targetIndex -> targetNodeIndex (in mountainpositions function)
  - add pretections for file-based in case it already exists (doesnt overwrite)
  - add persistent leveldb support with NAMESPACE feature
 */
-
-nodes (map[int64][]byte):
-{ 
-  30 : 0x1234567890,
-  33 : 0x2143658709,
-  34 : 0x1234123434
-}
-
-encodable version ([][][]byte):
-[
-  [12,34],
-  [
-    [1e],
-    [12,34,56,78,90]
-  ],
-  [
-    [21],
-    [21,43,65,87,09]
-  ],
-  [
-    [22],
-    [12,34,12,34,34]
-  ]
-]
 
  -->
